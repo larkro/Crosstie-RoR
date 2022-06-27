@@ -1,0 +1,53 @@
+version: "3.8"
+services:
+  memcached:
+    image: "memcached"
+    container_name: memcached
+    networks:
+      - rails-dev
+    ports:
+      - "11211:11211"
+
+  redis:
+    image: "redis"
+    container_name: redis
+    networks:
+      - rails-dev
+    ports:
+      - "6379:6379"
+
+  mariadb:
+    image: "mariadb"
+    container_name: mariadb
+    networks:
+      - rails-dev
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb-volume:/var/run/mysql/
+    environment:
+      - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=true
+      - MARIADB_MYSQL_LOCALHOST_GRANTS=true
+
+  postgres:
+    image: "postgres"
+    container_name: postgres
+    networks:
+      - rails-dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-volume:/var/run/postgresql/
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=rails_development
+
+networks:
+  rails-dev:
+    driver: bridge
+    name: rails-dev
+
+volumes:
+  postgres-volume:
+  mariadb-volume:
