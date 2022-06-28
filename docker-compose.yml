@@ -30,7 +30,7 @@ services:
       - MARIADB_MYSQL_LOCALHOST_GRANTS=true
 
   postgres:
-    image: "postgres"
+    image: "postgres:13"
     container_name: postgres
     networks:
       - rails-dev
