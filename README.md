@@ -63,8 +63,8 @@ $ run-test          # Run rails tests in the rails-dev docker-container towards 
 Got some issues with `redis`. Error msg
 `/usr/local/bundle/gems/redis-4.5.1/lib/redis/client.rb:473:in '_parse_options': invalid uri scheme '' (ArgumentError)`
 
-postgres versions issues, or at least with the pg_dump. pg_dump: error: server version: 14.4 (Debian 14.4-1.pgdg110+1); pg_dump version: 13.7 (Debian 13.7-0+deb11u1)
-pg_dump: error: aborting because of server version mismatch
+~~postgres versions issues, or at least with the pg_dump. pg_dump: error: server version: 14.4 (Debian 14.4-1.pgdg110+1); pg_dump version: 13.7 (Debian 13.7-0+deb11u1)
+pg_dump: error: aborting because of server version mismatch~~ Downgraded in docker-compose to image: "postgres:13".
 
 Way too much is running as `root` and access is without proper authentication.
 First step is to make it work.
