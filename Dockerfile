@@ -1,7 +1,4 @@
-FROM ruby:3.1
-
-# throw errors if Gemfile has been modified since Gemfile.lock
-RUN bundle config --global frozen 1
+FROM ruby:3.1 AS builder
 
 ## OS and JS deps
 # .hadolint.yaml
@@ -34,12 +31,16 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
     poppler-utils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && yarn install \
-    && yarn cache clean
+
+FROM builder
+# throw errors if Gemfile has been modified since Gemfile.lock
+RUN bundle config --global frozen 1
 
 # We expect rails.git to be cloned into dir rails
 WORKDIR /usr/src/rails
 COPY rails/ .
-RUN bundle install
+RUN bundle install \
+    && yarn install \
+    && yarn cache clean
 
 CMD ["/usr/bin/bash"]
