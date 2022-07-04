@@ -25,6 +25,14 @@ Goal: run container locally with the stuff needed for you and your favorite IDE 
 Some container engine that can run docker images, we have used `colima`.
 [Instructions to use Colima](https://smallsharpsoftwaretools.com/tutorials/use-colima-to-run-docker-containers-on-macos/)
 
+**note:** colima must be started with write permissions, add:
+
+```bash
+--mount ${HOME}:w`
+````
+
+Default mount is read only, write is needed when running rails tests.
+
 The tools we have used can easliy be installed using `HomeBrew`.
 
 ```bash
@@ -39,7 +47,9 @@ Read more about it:
 
 For extra fun start it with `kubernetes` support, add some cpu and ram.
 
-$ `colima start --with-kubernetes --cpu 4 --memory 4`
+```bash
+$ colima start --with-kubernetes --cpu 4 --memory 4 --mount ${HOME}:w`
+````
 
 ## How to
 
