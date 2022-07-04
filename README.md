@@ -48,8 +48,8 @@ Read more about it:
 For extra fun start it with `kubernetes` support, add some cpu and ram.
 
 ```bash
-$ colima start --with-kubernetes --cpu 4 --memory 4 --mount ${HOME}:w`
-````
+$ colima start --with-kubernetes --cpu 4 --memory 4 --mount ${HOME}:w
+```
 
 ## How to
 
