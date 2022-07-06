@@ -17,7 +17,7 @@ docker-compose-up: ## Start dependency services: memcached, redis, mariadb, post
 get-shell: ## Run the rails-dev docker-image to get a shell
 	docker run -it --network rails-dev \
 		--env REDIS_URL="redis://redis:6379/" \
-		--env MEMCACHE_SERVERS=memcached \
+		--env MEMCACHE_SERVERS="memcached:11211" \
 		--env MYSQL_HOST=mariadb \
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
@@ -31,7 +31,7 @@ setup-mysql-user: ## Run the rails-dev docker-image to setup the mysql db (maria
 setup-db: ## Run the rails-dev docker-image to create and build databases
 	docker run -i --network rails-dev \
 		--env REDIS_URL="redis://redis:6379/" \
-		--env MEMCACHE_SERVERS=memcached \
+		--env MEMCACHE_SERVERS="memcached:11211" \
 		--env MYSQL_HOST=mariadb \
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
@@ -45,7 +45,7 @@ setup-db: ## Run the rails-dev docker-image to create and build databases
 run-test: ## Run rails tests in the rails-dev docker-image towards services in docker-compose
 	docker run -i --network rails-dev \
 		--env REDIS_URL="redis://redis:6379/" \
-		--env MEMCACHE_SERVERS=memcached \
+		--env MEMCACHE_SERVERS="memcached:11211" \
 		--env MYSQL_HOST=mariadb \
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
