@@ -19,6 +19,7 @@ get-shell: ## Run the rails-dev docker-image to get a shell
 		--env REDIS_URL="redis://redis:6379/" \
 		--env MEMCACHE_SERVERS="memcached:11211" \
 		--env MYSQL_HOST=mariadb \
+		--env MYSQL_SOCK="/run/mysqld/mysqld.sock" \
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
 		-v `pwd`/rails:/usr/src/rails rails-dev /bin/bash
@@ -33,6 +34,7 @@ setup-db: ## Run the rails-dev docker-image to create and build databases
 		--env REDIS_URL="redis://redis:6379/" \
 		--env MEMCACHE_SERVERS="memcached:11211" \
 		--env MYSQL_HOST=mariadb \
+		--env MYSQL_SOCK="/run/mysqld/mysqld.sock" \
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
 		-v `pwd`/rails:/usr/src/rails \
@@ -47,6 +49,7 @@ run-test: ## Run rails tests in the rails-dev docker-image towards services in d
 		--env REDIS_URL="redis://redis:6379/" \
 		--env MEMCACHE_SERVERS="memcached:11211" \
 		--env MYSQL_HOST=mariadb \
+		--env MYSQL_SOCK="/run/mysqld/mysqld.sock" \
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
 		-v `pwd`/rails:/usr/src/rails \
