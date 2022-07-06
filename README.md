@@ -48,7 +48,7 @@ Read more about it:
 For extra fun start it with `kubernetes` support, add some cpu and ram.
 
 ```bash
-colima start --with-kubernetes --cpu 4 --memory 4 --mount ${HOME}:w
+colima start --with-kubernetes --cpu 6 --memory 6 --mount ${HOME}:w
 ```
 
 ## How to
@@ -68,43 +68,13 @@ $ setup-db          # Run the rails-dev docker-container to create and build dat
 $ run-test          # Run rails tests in the rails-dev docker-container towards services in docker-compose
 ```
 
-## Notes / Issues
+## Issues
 
-~~Got some issues with `redis`. Error msg
-`/usr/local/bundle/gems/redis-4.5.1/lib/redis/client.rb:473:in '_parse_options': invalid uri scheme '' (ArgumentError)`~~ fixed REDIS_URL
+Create Issues in git for better tracking.
+Some general things are:
 
-~~postgres versions issues, or at least with the pg_dump. pg_dump: error: server version: 14.4 (Debian 14.4-1.pgdg110+1); pg_dump version: 13.7 (Debian 13.7-0+deb11u1)
-pg_dump: error: aborting because of server version mismatch~~ Downgraded in docker-compose to image: "postgres:13".
-
-Way too much is running as `root` and access is without proper authentication.
+Too much is running with too high privilege and access is without proper authentication.
 First step is to make it work.
 Then make it work in a more correct way.
 
 Look into why some tests are skipped.
-
-Postgres as "foreign_server" fails `ForeignTableTest#test_update_record:
-RuntimeError: Wrapped undumpable exception for: ActiveRecord::StatementInvalid: PG::SqlclientUnableToEstablishSqlconnection: ERROR:  could not connect to server "foreign_server"
-DETAIL:  connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: FATAL:  role "postgres" does not exist`
-At a first glance it looks like multiple roles/access types are needed. Looks like some access is via socket and some via TCP. Can not use DATABASE_URL since it breaks other things and running docker-image as USER postgres breaks something else.
-
-Needed to add more cpu and ram `--cpu 4 --memory 4` on my old Macbbook.
-
-Needed to install yarn and eslint in Dockerfile. `/bin/sh: 1: eslint: not found`
-
-Added MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=true and MARIADB_MYSQL_LOCALHOST_GRANTS=true to `docker-compose`
-because of access between different pods. Error was: `Access denied for user 'rails'@'172.18.0.6' (using password: NO) (Mysql2::Error::ConnectionError)`
-
-Installed `poppler-utils` in `Dockerfile`
-because of error msg: `ActiveStorage::Previewer::PopplerPDFPreviewerTest#test_previewing_a_PDF_that_can't_be_previewed [/usr/src/rails/activestorage/test/previewer/poppler_pdf_previewer_test.rb:38]:
-[ActiveStorage::PreviewError] exception expected, not
-Class: <Errno::ENOENT>
-Message: <"No such file or directory - pdftoppm">`
-
-And the same with `libvips42` because of error msg: `ActiveStorage::Representations::RedirectControllerWithVariantsTest#test_showing_variant_inline:
-LoadError: Could not open library 'vips.so.42': vips.so.42: cannot open shared object file: No such file or directory.
-Could not open library 'libvips.so.42': libvips.so.42: cannot open shared object file: No such file or directory`
-
-Instructions [development_dependencies_install](https://guides.rubyonrails.org/development_dependencies_install.html) for 2.3.2 Ubuntu talk about mysql, but it's no longer the standard app so instead `Dockerfile` is updated with packages
-`mariadb-server
-libmariadb-dev-compat
-libmariadb-dev`
