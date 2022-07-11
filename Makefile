@@ -55,6 +55,18 @@ run-test: ## Run rails tests in the rails-dev docker-image towards services in d
 		-v `pwd`/rails:/usr/src/rails \
 		rails-dev bundle exec rake test
 
+run-test-verbose: ## Run rails tests in the rails-dev docker-image towards services in docker-compose
+	docker run -i --network rails-dev \
+		--env REDIS_URL="redis://redis:6379/" \
+		--env MEMCACHE_SERVERS="memcached:11211" \
+		--env MYSQL_HOST=mariadb \
+		--env MYSQL_SOCK="/run/mysqld/mysqld.sock" \
+		--env TESTOPTS="--verbose" \
+		--volumes-from=postgres \
+		--volumes-from=mariadb \
+		-v `pwd`/rails:/usr/src/rails \
+		rails-dev bundle exec rake test
+
 help: ## Display this output.
 	@egrep '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
