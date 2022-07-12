@@ -1,3 +1,5 @@
+include .env ## Include variables from .env
+
 lint: ## Run hadolint on Dockerfile
 	docker run --rm -v `pwd`/.hadolint.yaml:/.config/hadolint.yaml -i hadolint/hadolint < Dockerfile
 
@@ -11,29 +13,20 @@ pull: ## Git pull the rails repo to directory rails
 docker-build: ## Build the rails docker-image
 	docker build -t rails-dev .
 
-docker-compose-up: ## Start dependency services: memcached, redis, mariadb, postgresql
-	docker-compose up -d
+docker-convert: ## Display docker compose convert
+	docker compose convert
 
-get-shell: ## Run the rails-dev docker-image to get a shell
-	docker run -it --network rails-dev \
-		--env REDIS_URL="redis://redis:6379/" \
-		--env MEMCACHE_SERVERS="memcached:11211" \
-		--env MYSQL_HOST=mariadb \
-		--env MYSQL_SOCK="/run/mysqld/mysqld.sock" \
-		--volumes-from=postgres \
-		--volumes-from=mariadb \
-		-v `pwd`/rails:/usr/src/rails rails-dev /bin/bash
+docker-compose-up: ## Start dependency services: memcached, redis, mariadb, postgresql. Variables from .env
+	docker-compose up -d
 
 setup-mysql-user: ## Run the rails-dev docker-image to setup the mysql db (mariadb)
 	cat mysql-setup-database.sql | docker run -i --network rails-dev \
-		--env MYSQL_HOST=mariadb \
-		rails-dev /usr/bin/mariadb -h mariadb 
+		rails-dev /usr/bin/mariadb -h $(MYSQL_HOST) 
 
 setup-db: ## Run the rails-dev docker-image to create and build databases
-	docker run -i --network rails-dev \
-		--env REDIS_URL="redis://redis:6379/" \
+	docker run -i --network rails-dev --env-file .env \
 		--env MEMCACHE_SERVERS="memcached:11211" \
-		--env MYSQL_HOST=mariadb \
+		--env REDIS_URL="redis://redis:6379/" \
 		--env MYSQL_SOCK="/run/mysqld/mysqld.sock" \
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
@@ -44,31 +37,29 @@ setup-db: ## Run the rails-dev docker-image to create and build databases
 		bundle exec rake db:mysql:build ; \
 		bundle exec rake db:postgresql:build"
 
+run-command: ## Run command with rails-dev image, default: /bin/bash
+	docker run -it --network rails-dev --env-file .env \
+		--volumes-from=postgres \
+		--volumes-from=mariadb \
+		-v `pwd`/rails:/usr/src/rails rails-dev $(RUN_COMMAND)
+
 run-test: ## Run rails tests in the rails-dev docker-image towards services in docker-compose
-	docker run -i --network rails-dev \
-		--env REDIS_URL="redis://redis:6379/" \
-		--env MEMCACHE_SERVERS="memcached:11211" \
-		--env MYSQL_HOST=mariadb \
-		--env MYSQL_SOCK="/run/mysqld/mysqld.sock" \
+	docker run -i --network rails-dev --env-file .env \
+		--env TESTOPTS="" \
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
 		-v `pwd`/rails:/usr/src/rails \
 		rails-dev bundle exec rake test
 
-run-test-verbose: ## Run rails tests in the rails-dev docker-image towards services in docker-compose
-	docker run -i --network rails-dev \
-		--env REDIS_URL="redis://redis:6379/" \
-		--env MEMCACHE_SERVERS="memcached:11211" \
-		--env MYSQL_HOST=mariadb \
-		--env MYSQL_SOCK="/run/mysqld/mysqld.sock" \
-		--env TESTOPTS="--verbose" \
+run-test-testops: ## Run rails tests in the rails-dev docker-image ... with testopts, default: --verbose
+	docker run -i --network rails-dev --env-file .env \
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
 		-v `pwd`/rails:/usr/src/rails \
 		rails-dev bundle exec rake test
 
 help: ## Display this output.
-	@egrep '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@egrep '^[a-zA-Z_-]+:.*?## .*$$' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: clean help lint clone pull docker-build docker-compose-up get-shell setup-mysql-user setup-db run-test
+.PHONY: clean help lint clone pull docker-build docker-convert docker-compose-up setup-mysql-user setup-db run-command run-test run-test-verbose
 .DEFAULT_GOAL := help
