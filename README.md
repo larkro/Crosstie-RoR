@@ -58,18 +58,66 @@ Run `make` to see the help.
 
 The short story.
 
+```make
+lint                 Run hadolint on Dockerfile
+clone                Clone the rails repo to directory rails
+docker-build         Build the rails docker-image
+docker-convert       Display docker compose convert
+docker-compose-up    Start dependency services: memcached, redis, mariadb, postgresql. Variables from .env
+docker-clean-up      Stop dependency services: memcached, redis, mariadb, postgresql. Prune containers and volumes
+setup-mysql-user     Run the rails-dev docker-image to setup the mysql db (mariadb)
+setup-db             Run the rails-dev docker-image to create and build databases
+drop-create-test-db  Drop and create test dbs
+run-command          Run command with rails-dev image, default: /bin/bash
+run-command-without-env Run command with rails-dev image, without env vars, default: /bin/bash
+run-test             Run rails tests in the rails-dev docker-image towards services in docker-compose
+run-test-testops     Run rails tests in the rails-dev docker-image ... with testopts, default: --verbose
+help                 Display this output.
+```
+
+## Recommended Workflow
+
+The recommended workflow is
+
+* pick the versions of each dependency in .env
+
+* edit rails files in the host computer with your favorite IDE and
+
+* run a container with a shell where you run tests.
+
+## Example
+
+Edit files locally in your prefered IDE.
+
 ```bash
-$ make clone        # Will clone rails git repo to directory rails
-$ make docker-build # Build the rails docker-image
-$ docker-compose-up # Start dependency services, memcached, redis, mariadb, postgresql
-$ setup-mysql-user  # Run the rails-dev docker-container to setup the mysql db (mariadb)
-$ setup-db          # Run the rails-dev docker-container to create and build databases
-# Edit files / tests in directory rails, it will be mounted by the image.
-$ run-test          # Run rails tests in the rails-dev docker-container towards services in docker-compose
+sed -i".bak" 's/Spammer layout We do not spam/This should show up as fail/' rails/actionmailer/test/mail_layout_test.rb
+```
+
+Run test, often easier to start a container with a shell and manually run it in another terminal.
+
+```bash
+make RUN_COMMAND="/bin/bash -c 'cd actionmailer && bin/test test/mail_layout_test.rb -n test_explicit_class_layout'" run-command
+```
+
+See the error and iterate until pass.
+
+```bash
+# Running:
+
+F
+
+Failure:
+LayoutMailerTest#test_explicit_class_layout [/usr/src/rails/actionmailer/test/mail_layout_test.rb:90]:
+--- expected
++++ actual
+@@ -1 +1 @@
+-"This should show up as fail"
++"Spammer layout We do not spam"
 ```
 
 ## Issues
 
+Still a lot. :-) Just started.
 Create Issues in git for better tracking.
 Some general things are:
 
@@ -77,4 +125,4 @@ Too much is running with too high privilege and access is without proper authent
 First step is to make it work.
 Then make it work in a more correct way.
 
-Look into why some tests are skipped.
+Look into why some tests are skipped and good ways of handling version deps and such.

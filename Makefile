@@ -6,10 +6,6 @@ lint: ## Run hadolint on Dockerfile
 clone: ## Clone the rails repo to directory rails
 	git clone https://github.com/rails/rails.git
 
-pull: ## Git pull the rails repo to directory rails
-	cd rails
-	git pull
-
 docker-build: ## Build the rails docker-image
 	docker build -t rails-dev .
 
@@ -43,6 +39,20 @@ setup-db: ## Run the rails-dev docker-image to create and build databases
 		bundle exec rake db:mysql:build ; \
 		bundle exec rake db:postgresql:build"
 
+drop-create-test-db: ## Drop and create test dbs
+	docker run -it --network rails-dev --env-file .env \
+		--env MEMCACHE_SERVERS="memcached:11211" \
+		--env MYSQL_HOST=mariadb \
+		--env MYSQL_SOCK="/run/mysqld/mysqld.sock" \
+		--env REDIS_URL="redis://redis:6379/" \
+		--volumes-from=postgres \
+		--volumes-from=mariadb \
+		-v `pwd`/rails:/usr/src/rails \
+		rails-dev /bin/bash -c " \
+		cd activerecord ; \
+		bundle exec rake db:drop ; \
+		bundle exec rake db:create"
+
 run-command: ## Run command with rails-dev image, default: /bin/bash
 	docker run -it --network rails-dev --env-file .env \
 		--volumes-from=postgres \
@@ -65,7 +75,7 @@ run-test: ## Run rails tests in the rails-dev docker-image towards services in d
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
 		-v `pwd`/rails:/usr/src/rails \
-		rails-dev /bin/bash -c "env && bundle exec rake test"
+		rails-dev bundle exec rake test
 
 run-test-testops: ## Run rails tests in the rails-dev docker-image ... with testopts, default: --verbose
 	docker run -i --network rails-dev \
@@ -82,5 +92,5 @@ run-test-testops: ## Run rails tests in the rails-dev docker-image ... with test
 help: ## Display this output.
 	@egrep '^[a-zA-Z_-]+:.*?## .*$$' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: clean help lint clone pull docker-build docker-convert docker-compose-up docker-clean-up setup-mysql-user setup-db run-command run-command-without-env run-test run-test-verbose
+.PHONY: clean help lint clone docker-build docker-convert docker-compose-up docker-clean-up setup-mysql-user setup-db drop-create-test-db run-command run-command-without-env run-test run-test-verbose
 .DEFAULT_GOAL := help
