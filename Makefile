@@ -7,7 +7,7 @@ clone: ## Clone the rails repo to directory rails
 	git clone https://github.com/rails/rails.git
 
 docker-build: ## Build the rails docker-image
-	docker build -t rails-dev --build-arg $(RUBY_VERSION) .
+	docker build -t rails-dev:$(RUBY_VERSION) --build-arg $(RUBY_VERSION) .
 
 docker-convert: ## Display docker compose convert
 	docker compose convert
@@ -20,11 +20,11 @@ docker-clean-up: ## Stop dependency services: memcached, redis, mariadb, postgre
 	docker container prune
 	docker volume prune
 
-setup-mysql-user: ## Run the rails-dev docker-image to setup the mysql db (mariadb)
+setup-mysql-user: ## Run the rails-dev:$(RUBY_VERSION) docker-image to setup the mysql db (mariadb)
 	cat mysql-setup-database.sql | docker run -i --network rails-dev \
-		rails-dev /usr/bin/mariadb -h mariadb
+		rails-dev:$(RUBY_VERSION) /usr/bin/mariadb -h mariadb
 
-setup-db: ## Run the rails-dev docker-image to create and build databases
+setup-db: ## Run the rails-dev:$(RUBY_VERSION) docker-image to create and build databases
 	docker run -i --network rails-dev --env-file .env \
 		--env MEMCACHE_SERVERS="memcached:11211" \
 		--env MYSQL_HOST=mariadb \
@@ -33,7 +33,7 @@ setup-db: ## Run the rails-dev docker-image to create and build databases
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
 		-v `pwd`/rails:/usr/src/rails \
-		rails-dev /bin/bash -c " \
+		rails-dev:$(RUBY_VERSION) /bin/bash -c " \
 		cd activerecord ; \
 		bundle exec rake db:create ; \
 		bundle exec rake db:mysql:build ; \
@@ -48,24 +48,24 @@ drop-create-test-db: ## Drop and create test dbs
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
 		-v `pwd`/rails:/usr/src/rails \
-		rails-dev /bin/bash -c " \
+		rails-dev:$(RUBY_VERSION) /bin/bash -c " \
 		cd activerecord ; \
 		bundle exec rake db:drop ; \
 		bundle exec rake db:create"
 
-run-command: ## Run command with rails-dev image, default: /bin/bash
+run-command: ## Run command with rails-dev:$(RUBY_VERSION) image, default: /bin/bash
 	docker run -it --network rails-dev --env-file .env \
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
-		-v `pwd`/rails:/usr/src/rails rails-dev $(RUN_COMMAND)
+		-v `pwd`/rails:/usr/src/rails rails-dev:$(RUBY_VERSION) $(RUN_COMMAND)
 
-run-command-without-env: ## Run command with rails-dev image, without env vars, default: /bin/bash
+run-command-without-env: ## Run command with rails-dev:$(RUBY_VERSION) image, without env vars, default: /bin/bash
 	docker run -it --network rails-dev \
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
-		-v `pwd`/rails:/usr/src/rails rails-dev $(RUN_COMMAND)
+		-v `pwd`/rails:/usr/src/rails rails-dev:$(RUBY_VERSION) $(RUN_COMMAND)
 
-run-test: ## Run rails tests in the rails-dev docker-image towards services in docker-compose
+run-test: ## Run rails tests in the rails-dev:$(RUBY_VERSION) docker-image towards services in docker-compose
 	docker run -i --network rails-dev \
 		--env MEMCACHE_SERVERS="memcached:11211" \
 		--env MYSQL_HOST=mariadb \
@@ -75,9 +75,9 @@ run-test: ## Run rails tests in the rails-dev docker-image towards services in d
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
 		-v `pwd`/rails:/usr/src/rails \
-		rails-dev bundle exec rake test
+		rails-dev:$(RUBY_VERSION) bundle exec rake test
 
-run-test-testops: ## Run rails tests in the rails-dev docker-image ... with testopts, default: --verbose
+run-test-testops: ## Run rails tests in the rails-dev:$(RUBY_VERSION) docker-image ... with testopts, default: --verbose
 	docker run -i --network rails-dev \
 		--env MEMCACHE_SERVERS="memcached:11211" \
 		--env MYSQL_HOST=mariadb \
@@ -87,7 +87,7 @@ run-test-testops: ## Run rails tests in the rails-dev docker-image ... with test
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
 		-v `pwd`/rails:/usr/src/rails \
-		rails-dev bundle exec rake test
+		rails-dev:$(RUBY_VERSION) bundle exec rake test
 
 help: ## Display this output.
 	@egrep '^[a-zA-Z_-]+:.*?## .*$$' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
