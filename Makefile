@@ -7,7 +7,7 @@ clone: ## Clone the rails repo to directory rails
 	git clone https://github.com/rails/rails.git
 
 docker-build: ## Build the rails docker-image
-	docker build -t rails-dev .
+	docker build -t rails-dev --build-arg $(RUBY_VERSION) .
 
 docker-convert: ## Display docker compose convert
 	docker compose convert
