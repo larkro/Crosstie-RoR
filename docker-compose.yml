@@ -4,7 +4,7 @@ services:
     image: "memcached:${MEMCACHED_VERSION:-latest}"
     container_name: memcached
     networks:
-      - rails-dev
+      - rails-net
     ports:
       - "11211:11211"
 
@@ -12,7 +12,7 @@ services:
     image: "redis:${REDIS_VERSION:-latest}"
     container_name: redis
     networks:
-      - rails-dev
+      - rails-net
     ports:
       - "6379:6379"
 
@@ -20,7 +20,7 @@ services:
     image: "mariadb:${MARIADB_VERSION:-latest}"
     container_name: mariadb
     networks:
-      - rails-dev
+      - rails-net
     ports:
       - "3306:3306"
     volumes:
@@ -33,7 +33,7 @@ services:
     image: "postgres:${POSTGRES_VERSION:-latest}"
     container_name: postgres
     networks:
-      - rails-dev
+      - rails-net
     ports:
       - "5432:5432"
     volumes:
@@ -44,9 +44,9 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-rails_development}
 
 networks:
-  rails-dev:
+  rails-net:
     driver: bridge
-    name: rails-dev
+    name: rails-net
 
 volumes:
   postgres-volume:
