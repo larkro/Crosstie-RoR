@@ -21,11 +21,11 @@ docker-clean-up: ## Stop dependency services: memcached, redis, mariadb, postgre
 	docker volume prune
 
 setup-mysql-user: ## Run the rails-dev:$(RUBY_VERSION) docker-image to setup the mysql db (mariadb)
-	cat mysql-setup-database.sql | docker run -i --network rails-dev \
+	cat mysql-setup-database.sql | docker run -i --network rails-net \
 		rails-dev:$(RUBY_VERSION) /usr/bin/mariadb -h mariadb
 
 setup-db: ## Run the rails-dev:$(RUBY_VERSION) docker-image to create and build databases
-	docker run -i --network rails-dev --env-file .env \
+	docker run -i --network rails-net --env-file .env \
 		--env MEMCACHE_SERVERS="memcached:11211" \
 		--env MYSQL_HOST=mariadb \
 		--env MYSQL_SOCK="/run/mysqld/mysqld.sock" \
@@ -40,7 +40,7 @@ setup-db: ## Run the rails-dev:$(RUBY_VERSION) docker-image to create and build 
 		bundle exec rake db:postgresql:build"
 
 drop-create-test-db: ## Drop and create test dbs
-	docker run -it --network rails-dev --env-file .env \
+	docker run -it --network rails-net --env-file .env \
 		--env MEMCACHE_SERVERS="memcached:11211" \
 		--env MYSQL_HOST=mariadb \
 		--env MYSQL_SOCK="/run/mysqld/mysqld.sock" \
@@ -54,19 +54,19 @@ drop-create-test-db: ## Drop and create test dbs
 		bundle exec rake db:create"
 
 run-command: ## Run command with rails-dev:$(RUBY_VERSION) image, default: /bin/bash
-	docker run -it --network rails-dev --env-file .env \
+	docker run -it --network rails-net --env-file .env \
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
 		-v `pwd`/rails:/usr/src/rails rails-dev:$(RUBY_VERSION) $(RUN_COMMAND)
 
 run-command-without-env: ## Run command with rails-dev:$(RUBY_VERSION) image, without env vars, default: /bin/bash
-	docker run -it --network rails-dev \
+	docker run -it --network rails-net \
 		--volumes-from=postgres \
 		--volumes-from=mariadb \
 		-v `pwd`/rails:/usr/src/rails rails-dev:$(RUBY_VERSION) $(RUN_COMMAND)
 
 run-test: ## Run rails tests in the rails-dev:$(RUBY_VERSION) docker-image towards services in docker-compose
-	docker run -i --network rails-dev \
+	docker run -i --network rails-net \
 		--env MEMCACHE_SERVERS="memcached:11211" \
 		--env MYSQL_HOST=mariadb \
 		--env MYSQL_SOCK="/run/mysqld/mysqld.sock" \
@@ -78,7 +78,7 @@ run-test: ## Run rails tests in the rails-dev:$(RUBY_VERSION) docker-image towar
 		rails-dev:$(RUBY_VERSION) bundle exec rake test
 
 run-test-testops: ## Run rails tests in the rails-dev:$(RUBY_VERSION) docker-image ... with testopts, default: --verbose
-	docker run -i --network rails-dev \
+	docker run -i --network rails-net \
 		--env MEMCACHE_SERVERS="memcached:11211" \
 		--env MYSQL_HOST=mariadb \
 		--env MYSQL_SOCK="/run/mysqld/mysqld.sock" \
