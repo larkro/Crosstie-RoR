@@ -1,4 +1,5 @@
-FROM ruby:3.1 AS builder
+ARG RUBY_VERSION=3.1    # overriden by docker build --build-arg, using make it's supplied from .env
+FROM ruby:${RUBY_VERSION} AS builder
 
 ## OS and JS deps
 # .hadolint.yaml
