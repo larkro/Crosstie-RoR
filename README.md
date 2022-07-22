@@ -22,6 +22,41 @@ Goal: run container locally with the stuff needed for you and your favorite IDE 
 
 ## Prerequisite
 
+You need to have `brew`, `git` and `make` installed.
+
+### TL;DR
+
+If you have the prerequiste you can:
+
+```bash
+make install
+make colima
+make clone
+make docker-build
+make docker-compose-up
+```
+
+* install: colima kubectl docker docker-compose
+* colima: start colima with kubernetes and $HOME writable
+* clone: git clone the rails repo into directory rails
+* docker-build: build the rails-dev image
+* docker-compose-up: start the service: memcached, redis, mariadb, postgresq
+
+and that should give you an environment with all needed services running in containers and a docker image `rails-dev` where your code be tested.
+
+Use you favorite IDE to edit files in directory `rails`.
+
+Start an instance of `rails-dev` using `make run-command` where you can manually run the tests for the thing you are working on.
+
+Example:
+
+```bash
+cd activerecord
+bin/test test/cases/binary_test.rb -n test_load_save
+```
+
+### More details
+
 Some container engine that can run docker images, we have used `colima`.
 [Instructions to use Colima](https://smallsharpsoftwaretools.com/tutorials/use-colima-to-run-docker-containers-on-macos/)
 
@@ -59,6 +94,8 @@ Run `make` to see the help.
 The short story.
 
 ```make
+install              Use brew to install: colima kubectl docker docker-compose
+colima               Start colima with kubernetes and $HOME writable
 lint                 Run hadolint on Dockerfile
 clone                Clone the rails repo to directory rails
 docker-build         Build the rails docker-image
