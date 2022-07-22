@@ -1,5 +1,11 @@
 include .env ## Include variables from .env
 
+install: ## Use brew to install: colima kubectl docker docker-compose
+	brew install colima kubectl docker docker-compose
+
+colima: ## Start colima with kubernetes and $HOME writable
+	colima start --with-kubernetes --cpu 6 --memory 6 --mount ${HOME}:w
+
 lint: ## Run hadolint on Dockerfile
 	docker run --rm -v `pwd`/.hadolint.yaml:/.config/hadolint.yaml -i hadolint/hadolint < Dockerfile
 
